@@ -222,7 +222,8 @@ class ShoWind:
             plt.close()
         else:
             fout = open(filename, 'w')
-            plt.savefig(fout, bbox_inches=0, dpi=72)
+            #plt.savefig(fout, bbox_inches=0, dpi=72)
+            plt.savefig(fout)
             plt.close()
         return filename
 
@@ -249,7 +250,8 @@ class ShoWind:
                 plt.close()
             else:
                 fout = open(filename, 'w')
-                plt.savefig(fout, bbox_inches=0, dpi=72)
+                #plt.savefig(fout, bbox_inches=0, dpi=72)
+                plt.savefig(fout)
                 plt.close()
             return filename
         else:
