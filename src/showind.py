@@ -204,7 +204,7 @@ class ShoWind:
         dir = [d[4] for d in data]
         time = [mdates.date2num(datetime.datetime.strptime(d[1],
                 '%Y-%m-%d %H:%M:%S')) for d in data]
-        fig = plt.figure(figsize=(4,4), dpi=72)
+        fig = plt.figure(figsize=(4,4), dpi=80)
         ax1 = fig.add_subplot(211)
         ax1.plot_date(time, spd, 'b-')
         #ax1.plot_date(time, gust, 'g-')
@@ -221,9 +221,7 @@ class ShoWind:
             plt.show()
             plt.close()
         else:
-            fout = open(filename, 'w')
-            #plt.savefig(fout, bbox_inches=0, dpi=72)
-            plt.savefig(fout)
+            plt.savefig(filename)
             plt.close()
         return filename
 
@@ -238,7 +236,7 @@ class ShoWind:
                 '%Y-%m-%d %H:%M:%S')) for d in data]
 
         if len(data) >= 1:
-            fig = plt.figure(figsize=(4, 4), dpi=72, facecolor='w', edgecolor='w')
+            fig = plt.figure(figsize=(4, 4), dpi=80, facecolor='w', edgecolor='w')
             rect = [0.1, 0.1, 0.8, 0.8]
             ax = WindroseAxes(fig, rect, axisbg='w')
             fig.add_axes(ax)
@@ -249,9 +247,7 @@ class ShoWind:
                 plt.show()
                 plt.close()
             else:
-                fout = open(filename, 'w')
-                #plt.savefig(fout, bbox_inches=0, dpi=72)
-                plt.savefig(fout)
+                plt.savefig(filename)
                 plt.close()
             return filename
         else:
