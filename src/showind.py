@@ -98,6 +98,9 @@ class ShoWind:
         '''
         Fetch the x and y coordinate of the plot
         '''
+        if plot.startswith('L1-'):
+            plot = plot.split('-')
+            plot = 'L1G-' + plot[1]
         sql = """SELECT geometry FROM plot_location WHERE plot_id=?"""
         self.cursor.execute(sql, (plot,))
         row = self.cursor.fetchone()
@@ -204,7 +207,8 @@ class ShoWind:
         dir = [d[4] for d in data]
         time = [mdates.date2num(datetime.datetime.strptime(d[1],
                 '%Y-%m-%d %H:%M:%S')) for d in data]
-        fig = plt.figure(figsize=(4,4), dpi=80)
+        #fig = plt.figure(figsize=(8,8), dpi=80)
+        fig = plt.figure()
         ax1 = fig.add_subplot(211)
         ax1.plot_date(time, spd, 'b-')
         #ax1.plot_date(time, gust, 'g-')
@@ -236,7 +240,8 @@ class ShoWind:
                 '%Y-%m-%d %H:%M:%S')) for d in data]
 
         if len(data) >= 1:
-            fig = plt.figure(figsize=(4, 4), dpi=80, facecolor='w', edgecolor='w')
+            #fig = plt.figure(figsize=(8, 8), dpi=80, facecolor='w', edgecolor='w')
+            fig = plt.figure(facecolor='w', edgecolor='w')
             rect = [0.1, 0.1, 0.8, 0.8]
             ax = WindroseAxes(fig, rect, axisbg='w')
             fig.add_axes(ax)
@@ -285,7 +290,8 @@ class ShoWind:
                 pngfile = self.create_time_series_image(data, plot, plot + '_time.png')
                 rosefile = self.create_windrose(data, plot + '_rose.png')
                 kml = self._point_kml(plot, data, [pngfile,rosefile])
-            except:
+            except Exception as e:
+                logging.warning('Unknown exception has occurred')
                 if os.path.exists(pngfile):
                     os.remove(pngfile)
                 if os.path.exists(rosefile):
@@ -524,6 +530,14 @@ if __name__ == '__main__':
         usage()
 
     s = ShoWind('dan.sqlite', start, end)
+    if event:
+        s.cursor.execute('SELECT start, end FROM events WHERE name=?', (event,))
+        row = s.cursor.fetchone()
+        start = row[0]
+        end = row[1]
+        s.start = _import_date(start.replace(' ', 'T'))
+        s.end = _import_date(end.replace(' ', 'T'))
+
     if plot != 'all':
         d = s.fetch_point_data(plot)
         if not d:
@@ -541,16 +555,6 @@ if __name__ == '__main__':
         if windrose:
             s.create_windrose(d, f.replace('.', '_rose.'))
     else:
-        if event:
-            s.cursor.execute('SELECT start, end FROM events WHERE name=?', (event,))
-            row = s.cursor.fetchone()
-            start = row[0]
-            end = row[1]
-            s.start = _import_date(start.replace(' ', 'T'))
-            s.end = _import_date(end.replace(' ', 'T'))
-        else:
-            s.start = start
-            s.end = end
         if not outfile and event:
             outfile = event + '.kmz'
         elif not outfile:
