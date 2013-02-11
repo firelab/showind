@@ -475,7 +475,7 @@ class TestShoWind(unittest.TestCase):
 def usage():
     print('showind.py [--write] [--windrose] [--timeseries]')
     print('           [--start starttime] [--end endtime]')
-    print('           [--event name] plot')
+    print('           [--event name] plot output_file')
     sys.exit(1)
 
 if __name__ == '__main__':
@@ -484,6 +484,7 @@ if __name__ == '__main__':
         unittest.main(verbosity=2)
 
     plot = None
+    outfile = None
     start = None
     end = None
     event = None
@@ -512,6 +513,8 @@ if __name__ == '__main__':
             event = args[i]
         elif plot is None:
             plot = arg
+        elif outfile is None:
+            outfile = arg
         i += 1
     if not plot:
         usage()
@@ -527,7 +530,10 @@ if __name__ == '__main__':
             print('Could not fetch data for plot')
             usage()
         if write:
-            f = plot + '.png'
+            if outfile:
+                f = outfile
+            else:
+                f = plot + '.png'
         else:
             f = ''
         if timeseries:
@@ -535,14 +541,19 @@ if __name__ == '__main__':
         if windrose:
             s.create_windrose(d, f.replace('.', '_rose.'))
     else:
-        s.cursor.execute('SELECT start, end FROM events WHERE name=?', (event,))
-        event = s.cursor.fetchone()
-        if not event:
-            print('Could not load event')
-            usage()
-        start = event[0]
-        end = event[1]
-        s.start = _import_date(start.replace(' ', 'T'))
-        s.end = _import_date(end.replace(' ', 'T'))
-        s.create_field_kmz('out.kmz')
+        if event:
+            s.cursor.execute('SELECT start, end FROM events WHERE name=?', (event,))
+            row = s.cursor.fetchone()
+            start = row[0]
+            end = row[1]
+            s.start = _import_date(start.replace(' ', 'T'))
+            s.end = _import_date(end.replace(' ', 'T'))
+        else:
+            s.start = start
+            s.end = end
+        if not outfile and event:
+            outfile = event + '.kmz'
+        elif not outfile:
+            outfile = 'out.kmz'
+        s.create_field_kmz(outfile)
 
